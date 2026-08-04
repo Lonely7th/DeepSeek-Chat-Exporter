@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://m.aiwhaler.com/sitemap.xml
+Sitemap: https://www.deepseekchatexporter.cn/sitemap.xml
