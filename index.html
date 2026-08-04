@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="DeepSeek Chat Exporter - 一款强大的浏览器插件，支持一键导出 DeepSeek 对话为 Word, PDF, Markdown 等多种格式。完美保留代码高亮、LaTeX 公式与深度思考过程，构建您的专属 AI 知识库。">
+  <meta name="keywords"
+    content="DeepSeek Exporter, DeepSeek Chat Exporter, DeepSeek 插件, 导出 Word, 导出 PDF, AI 知识管理, 浏览器扩展">
+  <meta name="author" content="DeepSeek Chat Exporter Team">
+  <link rel="icon"
+    href="images/logo.png" />
+  <link rel="apple-touch-icon"
+    href="images/logo.png" />
+  <title>DeepSeek Chat Exporter - 专业 AI 对话管理与导出工具</title>
+
+  <style>
+    /* --- CSS Variables & Reset --- */
+    :root {
+      --primary-color: #2563eb;
+      --primary-dark: #1e40af;
+      --secondary-color: #0f172a;
+      --accent-color: #3b82f6;
+      --text-main: #334155;
+      --text-light: #64748b;
+      --bg-light: #f8fafc;
+      --white: #ffffff;
+      --success: #10b981;
+      --border-radius: 12px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: var(--text-main);
+      line-height: 1.6;
+      background-color: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      transition: color 0.2s;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: var(--white);
+      color: var(--primary-dark);
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background-color: #f0f9ff;
+    }
+
+    /* --- Header --- */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo span {
+      color: var(--primary-color);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .nav-links a:hover {
+      color: var(--primary-color);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* --- Hero Section with Slider --- */
+    .hero {
+      padding: 100px 0 60px;
+      /* Reduced top padding for slider */
+      background: radial-gradient(circle at 50% 0%, #eff6ff 0%, #fff 100%);
+      min-height: auto;
+    }
+
+    .hero-content-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 40px;
+      align-items: center;
+      padding: 40px 0;
+    }
+
+    .hero-text {
+      padding-right: 20px;
+    }
+
+    .badge {
+      background-color: #dbeafe;
+      color: var(--primary-dark);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      line-height: 1.2;
+      color: var(--secondary-color);
+      font-weight: 900;
+      margin-bottom: 24px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-light);
+      margin-bottom: 32px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    /* --- Carousel Styles (New) --- */
+    .hero-slider-container {
+      position: relative;
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fff;
+      aspect-ratio: 16/9;
+      /* Keeps images consistent */
+    }
+
+    .hero-slider-track {
+      display: flex;
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      height: 100%;
+    }
+
+    .hero-slide {
+      min-width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .hero-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .slider-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .slider-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .slider-dot.active {
+      background: var(--white);
+      transform: scale(1.2);
+    }
+
+    .slider-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--secondary-color);
+      transition: background 0.3s;
+      z-index: 10;
+    }
+
+    .slider-arrow:hover {
+      background: var(--white);
+    }
+
+    .prev-arrow {
+      left: 20px;
+    }
+
+    .next-arrow {
+      right: 20px;
+    }
+
+    /* --- Browsers Section --- */
+    .browsers {
+      padding: 40px 0;
+      background: var(--white);
+    }
+
+    .browser-grid {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .browser-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      background: var(--bg-light);
+      border-radius: var(--border-radius);
+      border: 1px solid #e2e8f0;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: var(--text-main);
+    }
+
+    .browser-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary-color);
+      color: var(--primary-dark);
+    }
+
+    .browser-icon {
+      width: 32px;
+      height: 32px;
+      background-color: var(--white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      font-weight: bold;
+      color: var(--primary-color);
+    }
+
+    .browser-info {
+      text-align: left;
+    }
+
+    .browser-name {
+      font-weight: 700;
+      display: block;
+    }
+
+    .browser-ver {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    /* --- Features Overview --- */
+    .features-overview {
+      padding: 80px 0;
+      background-color: var(--bg-light);
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-title h2 {
+      font-size: 2.25rem;
+      color: var(--secondary-color);
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+
+    .section-title p {
+      font-size: 1.125rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+    }
+
+    .feature-card {
+      background: var(--white);
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: var(--primary-color);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .icon-box {
+      width: 56px;
+      height: 56px;
+      background-color: #eff6ff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: var(--primary-color);
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+      color: var(--secondary-color);
+    }
+
+    .feature-card p {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
+    /* --- Deep Dive Section --- */
+    .deep-dive {
+      padding: 80px 0;
+    }
+
+    .split-layout {
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 80px;
+    }
+
+    .split-layout:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+
+    .split-content {
+      flex: 1;
+    }
+
+    .split-content h3 {
+      font-size: 2rem;
+      margin-bottom: 16px;
+      color: var(--secondary-color);
+    }
+
+    .split-content p {
+      color: var(--text-light);
+      margin-bottom: 24px;
+      font-size: 1.05rem;
+    }
+
+    .split-content ul li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .check-icon {
+      color: var(--success);
+      flex-shrink: 0;
+    }
+
+    .split-visual {
+      flex: 1;
+      background-color: var(--bg-light);
+      border-radius: 20px;
+      height: 350px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: inset 0 0 0 1px #e2e8f0;
+    }
+
+    .visual-placeholder {
+      text-align: center;
+      color: var(--text-light);
+    }
+
+    /* --- Privacy --- */
+    .privacy-section {
+      padding: 60px 0;
+      background: var(--secondary-color);
+      color: var(--white);
+      text-align: center;
+    }
+
+    .privacy-content h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .privacy-content p {
+      color: #94a3b8;
+      max-width: 700px;
+      margin: 0 auto 40px;
+      font-size: 1.1rem;
+    }
+
+    .privacy-badges {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .p-badge {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* --- FAQ --- */
+    .faq-section {
+      padding: 80px 0;
+      background-color: var(--bg-light);
+    }
+
+    .faq-wrapper {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    details {
+      background: var(--white);
+      margin-bottom: 16px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 20px 24px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--secondary-color);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: '+';
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--primary-color);
+    }
+
+    details[open] summary::after {
+      content: '-';
+    }
+
+    .faq-answer {
+      padding: 0 24px 24px;
+      color: var(--text-light);
+      border-top: 1px solid #f1f5f9;
+      margin-top: 10px;
+      padding-top: 16px;
+    }
+
+    /* --- Footer --- */
+    footer {
+      background-color: var(--white);
+      padding: 60px 0 30px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-brand h4 {
+      font-size: 1.5rem;
+      color: var(--secondary-color);
+      margin-bottom: 16px;
+      font-weight: 800;
+    }
+
+    .footer-brand p {
+      color: var(--text-light);
+      max-width: 300px;
+    }
+
+    .footer-col h5 {
+      font-size: 1rem;
+      margin-bottom: 20px;
+      color: var(--secondary-color);
+    }
+
+    .footer-col ul li {
+      margin-bottom: 12px;
+    }
+
+    .footer-col a {
+      color: var(--text-light);
+      font-size: 0.9rem;
+    }
+
+    .footer-col a:hover {
+      color: var(--primary-color);
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid #f1f5f9;
+      color: var(--text-light);
+      font-size: 0.875rem;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 992px) {
+      .hero-content-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-text {
+        padding-right: 0;
+        text-align: center;
+      }
+
+      .hero-actions {
+        justify-content: center;
+      }
+
+      .hero-slider-container {
+        order: -1;
+        /* Move slider to top on mobile */
+      }
+
+      .split-layout {
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      .split-layout:nth-child(even) {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <nav>
+        <a href="#" class="logo">
+          <img src="images/logo.png" style="width: 40px; height: 40px;">
+          DeepSeek Chat Exporter
+        </a>
+        <div class="nav-links">
+          <a href="#features">功能特性</a>
+          <a href="#install">浏览器支持</a>
+          <a href="#faq">常见问题</a>
+          <a href="https://www.aiwhaler.com/help/">帮助中心</a>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="https://www.aiwhaler.com/" class="btn btn-primary"
+            style="padding: 8px 20px; font-size: 0.9rem;">在线使用</a>
+        </div>
+        <button class="mobile-menu-btn" aria-label="Menu">☰</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section with Slider -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content-wrapper">
+        <!-- Left: Text Content -->
+        <div class="hero-text">
+          <div class="badge">专为重度 AI 用户打造</div>
+          <h1>将 DeepSeek 对话转化为<span class="highlight">专业文档</span></h1>
+          <p>DeepSeek Chat Exporter 是一款高效的浏览器插件。完美还原代码与公式，一键导出深度思考过程。支持 Word、PDF 等 7 种格式。</p>
+
+          <div class="hero-actions">
+            <a href="#install" class="btn btn-primary">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              免费安装插件
+            </a>
+            <a href="#features" class="btn btn-secondary">
+              了解更多
+            </a>
+          </div>
+
+          <!-- Browser Icons Mini -->
+          <div style="display:flex; gap:16px; color:var(--text-light); font-size:0.8rem; align-items:center;">
+            <span>支持:</span>
+            <span>Chrome</span> • <span>Edge</span> • <span>Firefox</span> • <span>360</span>
+          </div>
+        </div>
+
+        <!-- Right: Image Slider (The 7 Banners) -->
+        <div class="hero-slider-container" id="heroSlider">
+          <div class="hero-slider-track" id="sliderTrack">
+            <!-- IMPORTANT: Replace src URLs with your real banner images -->
+            <div class="hero-slide">
+              <img src="images/banner-1.png" alt="Banner 1">
+            </div>
+            <div class="hero-slide">
+              <img src="images/banner-3.png" alt="Banner 2">
+            </div>
+            <div class="hero-slide">
+              <img src="images/banner-2.png" alt="Banner 3">
+            </div>
+            <div class="hero-slide">
+              <img src="images/banner-4.png" alt="Banner 4">
+            </div>
+            <div class="hero-slide">
+              <img src="images/banner-5.png" alt="Banner 5">
+            </div>
+            <div class="hero-slide">
+              <img src="images/banner-6.png" alt="Banner 6">
+            </div>
+            <div class="hero-slide">
+              <img src="images/banner-7.png" alt="Banner 7">
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <button class="slider-arrow prev-arrow" id="prevBtn">❮</button>
+          <button class="slider-arrow next-arrow" id="nextBtn">❯</button>
+
+          <div class="slider-controls" id="sliderDots">
+            <!-- Dots generated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Browsers Section -->
+  <section id="install" class="browsers">
+    <div class="container">
+      <p style="text-align: center; font-weight: 600; color: var(--text-light); margin-bottom: 20px;">选择您的浏览器，即刻开始使用</p>
+      <div class="browser-grid">
+        <a href="https://chromewebstore.google.com/detail/%E9%B2%B8%E9%B1%BCai%E5%8A%A9%E6%89%8B-deepseek%E5%AF%BC%E5%87%BAword/foegcdhddlencjjkaeonjahfcdlmlihl"
+          target="_blank" class="browser-card">
+          <img src="images/lowcode-2406140.png" style="width: 40px; height: 40px;">
+          <div class="browser-info">
+            <span class="browser-name">Chrome</span>
+            <span class="browser-ver">v88+</span>
+          </div>
+        </a>
+        <a href="https://microsoftedge.microsoft.com/addons/detail/%E9%B2%B8%E9%B1%BCai%E5%8A%A9%E6%89%8B/lgfpicokhhemdpohohdlffponcillpfa"
+          target="_blank" class="browser-card">
+          <img src="images/lowcode-2406134.png" style="width: 40px; height: 40px;">
+          <div class="browser-info">
+            <span class="browser-name">Edge</span>
+            <span class="browser-ver">v88+</span>
+          </div>
+        </a>
+        <a href="https://ext.se.360.cn/#/extension-detail?id=hgahdgilffiglaefnmnkoclmigdaighg" target="_blank"
+          class="browser-card">
+          <img src="images/lowcode-2406123.png" style="width: 40px; height: 40px;">
+          <div class="browser-info">
+            <span class="browser-name">360 浏览器</span>
+            <span class="browser-ver">极速/安全版</span>
+          </div>
+        </a>
+        <a href="https://addons.mozilla.org/zh-CN/firefox/addon/deepseek%E5%AF%BC%E5%87%BAword-%E9%B2%B8%E9%B1%BCai%E5%8A%A9%E6%89%8B/"
+          target="_blank" class="browser-card">
+          <img src="images/lowcode-2458186.jfif" style="width: 40px; height: 40px;">
+          <div class="browser-info">
+            <span class="browser-name">Firefox</span>
+            <span class="browser-ver">v109+</span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Overview -->
+  <section id="features" class="features-overview">
+    <div class="container">
+      <div class="section-title">
+        <h2>重塑 AI 工作流</h2>
+        <p>不再满足于简单的复制粘贴，我们为您提供完整的企业级知识沉淀方案。</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h3>格式无损还原</h3>
+          <p>完整保留代码语法高亮、LaTeX 公式排版及复杂的表格层级。所见即所得，导出即定稿。</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="10 8 16 12 10 16 10 8"></polygon>
+            </svg>
+          </div>
+          <h3>深度思考留存</h3>
+          <p>DeepSeek 的推理过程极具价值。支持一键打包“深度思考”链条，不错过任何逻辑火花。</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3>知识闭环管理</h3>
+          <p>从高亮批注、本地收藏到云端备份，打造属于您的 DeepSeek 第二大脑与长期记忆库。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deep Dive Section -->
+  <section class="deep-dive">
+    <div class="container">
+      <div class="section-title">
+        <h2>强大功能细节</h2>
+        <p>为每一位追求效率的深度用户量身定制。</p>
+      </div>
+
+      <div class="split-layout">
+        <div class="split-content">
+          <h3>全能多格式导出引擎</h3>
+          <p>无论您是撰写报告、整理笔记还是进行数据分析，都能找到最匹配的格式。</p>
+          <ul>
+            <li><svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>文档类：Word (.docx), PDF, Markdown</li>
+            <li><svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>数据类：Excel, JSON, HTML, ipynb</li>
+            <li><svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>图片类：高清 PNG 一键生成</li>
+          </ul>
+        </div>
+        <div class="split-visual">
+          <div class="visual-placeholder">
+            <img src="images/banner-1.png" alt="Banner 1" style="border-radius: 10px;">
+          </div>
+        </div>
+      </div>
+
+      <div class="split-layout">
+        <div class="split-content">
+          <h3>深度定制与智能修复</h3>
+          <p>您的文档风格由您掌控。内置多项优化工具，让导出结果更加专业。</p>
+          <ul>
+            <li><svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>公式对齐自由切换（居中/居左）</li>
+            <li><svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>一键清理多余分割线与 Emoji</li>
+            <li><svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>自动修复 Markdown 格式错误</li>
+          </ul>
+        </div>
+        <div class="split-visual">
+          <div class="visual-placeholder">
+            <img src="images/banner-2.png" alt="Banner 1" style="border-radius: 10px;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy Section -->
+  <section class="privacy-section">
+    <div class="container">
+      <div class="privacy-content">
+        <h2>无痕模式：100% 隐私安全</h2>
+        <p>开启无痕模式后，所有数据处理均在本地进行高强度加密，云端零存储。从技术底层彻底保障您的商业机密与个人隐私。</p>
+        <div class="privacy-badges">
+          <div class="p-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            本地加密
+          </div>
+          <div class="p-badge">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            零云端存储
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="faq-section">
+    <div class="container">
+      <div class="section-title">
+        <h2>常见问题</h2>
+      </div>
+      <div class="faq-wrapper">
+        <details open>
+          <summary>DeepSeek Chat Exporter 是什么？</summary>
+          <div class="faq-answer">
+            DeepSeek Chat Exporter 是一款专为 DeepSeek 网页版设计的高效浏览器插件。核心功能是将聊天记录一键导出为 Word、PDF、Markdown
+            等多种格式。此外，它还支持深度思考过程导出、批量管理、文字高亮、本地收藏以及无痕加密模式等高级功能。
+          </div>
+        </details>
+        <details>
+          <summary>导出的文档能保留代码高亮和数学公式吗？</summary>
+          <div class="faq-answer">
+            完全可以。我们采用了先进的渲染引擎，无论是 Word、PDF 还是 Markdown，都能精准保留代码的语法高亮颜色、LaTeX 数学公式的排版以及复杂表格结构。您也可以在设置中调整公式的对齐方式。
+          </div>
+        </details>
+        <details>
+          <summary>插件的安全性如何？数据隐私有保障吗？</summary>
+          <div class="faq-answer">
+            非常安全。我们注重本地化体验。当您开启“无痕模式”后，所有对话数据、高亮标记和操作记录均在本地进行高强度加密处理，云端绝不存储任何信息，从技术上 100% 保护您的隐私。
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h4>DeepSeek Chat Exporter</h4>
+          <p>让每一次 AI 对话都沉淀为有价值的资产</p>
+        </div>
+        <div class="footer-col">
+          <h5>产品</h5>
+          <ul>
+            <li><a href="#features">功能介绍</a></li>
+            <li><a href="https://www.aiwhaler.com/help/">使用教程</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>支持</h5>
+          <ul>
+            <li><a href="https://www.aiwhaler.com/help/">常见问题</a></li>
+            <li><a href="https://www.aiwhaler.com/help/">联系我们</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>法律</h5>
+          <ul>
+            <li><a href="https://m.aiwhaler.com/privacy-policy-plugin-desp">隐私政策</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <p>&copy; 2026 DeepSeek Chat Exporter. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Mobile Menu Logic
+    document.querySelector('.mobile-menu-btn').addEventListener('click', function () {
+      const nav = document.querySelector('.nav-links');
+      if (nav.style.display === 'flex') {
+        nav.style.display = 'none';
+      } else {
+        nav.style.display = 'flex';
+        nav.style.flexDirection = 'column';
+        nav.style.position = 'absolute';
+        nav.style.top = '72px';
+        nav.style.left = '0';
+        nav.style.width = '100%';
+        nav.style.background = 'white';
+        nav.style.padding = '20px';
+        nav.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.1)';
+      }
+    });
+
+    // Slider Logic
+    const track = document.getElementById('sliderTrack');
+    const slides = document.querySelectorAll('.hero-slide');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const dotsContainer = document.getElementById('sliderDots');
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    let autoPlayInterval;
+
+    // Create dots
+    slides.forEach((_, index) => {
+      const dot = document.createElement('div');
+      dot.classList.add('slider-dot');
+      if (index === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => goToSlide(index));
+      dotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll('.slider-dot');
+
+    function updateSlider() {
+      track.style.transform = `translateX(-${currentIndex * 100}%)`;
+      dots.forEach(dot => dot.classList.remove('active'));
+      dots[currentIndex].classList.add('active');
+    }
+
+    function goToSlide(index) {
+      currentIndex = index;
+      if (currentIndex < 0) currentIndex = totalSlides - 1;
+      if (currentIndex >= totalSlides) currentIndex = 0;
+      updateSlider();
+    }
+
+    function nextSlide() {
+      goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+      goToSlide(currentIndex - 1);
+    }
+
+    // Auto Play
+    function startAutoPlay() {
+      autoPlayInterval = setInterval(nextSlide, 4000); // Change every 4 seconds
+    }
+
+    function stopAutoPlay() {
+      clearInterval(autoPlayInterval);
+    }
+
+    // Event Listeners
+    nextBtn.addEventListener('click', () => {
+      nextSlide();
+      stopAutoPlay();
+      startAutoPlay();
+    });
+
+    prevBtn.addEventListener('click', () => {
+      prevSlide();
+      stopAutoPlay();
+      startAutoPlay();
+    });
+
+    // Initialize
+    startAutoPlay();
+  </script>
+</body>
+
+</html>
